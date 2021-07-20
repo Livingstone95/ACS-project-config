@@ -53,7 +53,7 @@ yum install -y rpm-build
 make rpm
 yum install -y  ./build/amazon-efs-utils*rpm
 mkdir /var/www/
- mount -t efs -o tls,accesspoint=fsap-008b37afadbfd457c fs-35ff8081:/ /var/www/
+mount -t efs -o tls,accesspoint=fsap-008b37afadbfd457c fs-35ff8081:/ /var/www/
 yum install -y nginx
 systemctl start nginx
 systemctl enable nginx
@@ -136,6 +136,8 @@ sed -n 'w nginx.conf' web.conf
 systemctl restart nginx
 rm -rf web.conf
 rm -rf ACS-project-config
+#################################################################################
+
 
 # Creating database users for wordpress and tooling
 CREATE USER 'wordpress'@'192.168.1.0/24' IDENTIFIED WITH mysql_native_password BY 'w0rdpr33';
