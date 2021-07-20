@@ -1,0 +1,160 @@
+####commands for ami installation #############
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum install python3 -y
+yum install chrony
+systemctl start chronyd
+systemctl status chronyd
+systemctl enable chronyd
+yum install wget vim telnet htop
+
+#######################User data nginx###############################################################
+#!/bin/bash
+yum install -y  https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum install -y yum-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum install -y nginx
+systemctl start nginx
+systemctl enable nginx
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+systemctl start php-fpm
+systemctl enable php-fpm
+yum install -y git
+git clone https://github.com/Livingstone95/ACS-project-config.git
+mv ACS-project-config/reverse.conf /etc/nginx/
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf-distro
+cd /etc/nginx/
+touch nginx.conf
+sed -n 'w nginx.conf' reverse.conf
+systemctl restart nginx
+rm -rf reverse
+rm -rf ACS-project-config
+
+###############User data Bastion##########################
+#!/bin/bash
+yum install -y  https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum install -y yum-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum install -y mysql
+yum install -y git
+yum install -y ansible
+
+#######################User data wordpress###############################################################
+#!/bin/bash
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum install -y  git
+yum install -y mysql
+yum install -y wget
+git clone https://github.com/aws/efs-utils
+cd /efs-utils
+yum install -y make
+yum install -y rpm-build
+make rpm
+yum install -y  ./build/amazon-efs-utils*rpm
+mkdir /var/www/
+ mount -t efs -o tls,accesspoint=fsap-008b37afadbfd457c fs-35ff8081:/ /var/www/
+yum install -y nginx
+systemctl start nginx
+systemctl enable nginx
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install -y php php7.4-zip  php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+systemctl start php-fpm
+systemctl enable php-fpm
+wget http://wordpress.org/latest.tar.gz
+tar xzvf latest.tar.gz
+rm -rf latest.tar.gz
+cp wordpress/wp-config-sample.php wordpress/wp-config.php
+cp -R wordpress/* /var/www/html/
+chown -R nginx:nginx /var/www/html/
+cd /var/www/html/
+sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" wp-config.php 
+sed -i "s/username_here/wordpress/g" wp-config.php 
+sed -i "s/password_here/w0rdpr33/g" wp-config.php 
+sed -i "s/database_name_here/wordpressdb/g" wp-config.php 
+chcon -t httpd_sys_rw_content_t /var/www/html/ -R
+setsebool -P httpd_can_network_connect=1
+setsebool -P httpd_can_network_connect_db=1
+setsebool -P httpd_execmem=1
+setsebool -P httpd_use_nfs 1
+chcon -vR system_u:object_r:httpd_sys_content_t:s0 /var/www/html/
+git clone https://github.com/Livingstone95/ACS-project-config.git
+cp -R /ACS-project-config/web.conf /etc/nginx/
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf-distro
+touch /etc/nginx/nginx.conf
+cd /etc/nginx/
+sed -n 'w nginx.conf' web.conf
+systemctl restart nginx
+rm -rf web.conf
+rm -rf ACS-project-config
+
+
+#######################configure user data(tooling site)###############################################################
+#!/bin/bash
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum install -y  git
+yum install -y mysql
+yum install -y wget
+git clone https://github.com/aws/efs-utils
+cd /efs-utils
+yum install -y make
+yum install -y rpm-build
+make rpm
+yum install -y  ./build/amazon-efs-utils*rpm
+cd ..
+mkdir /var/www
+mount -t efs -o tls,accesspoint=fsap-006506e9d966ddb17 fs-35ff8081:/ /var/www/
+yum install -y nginx
+systemctl start nginx
+systemctl enable nginx
+chown -R nginx:nginx /var/www/html/
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install -y php  php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+systemctl start php-fpm
+systemctl enable php-fpm
+setsebool -P httpd_can_network_connect=1
+setsebool -P httpd_can_network_connect_db=1
+setsebool -P httpd_execmem=1
+setsebool -P httpd_use_nfs 1
+chcon -vR system_u:object_r:httpd_sys_content_t:s0 /var/www/html/
+git clone https://github.com/Livingstone95/devops-tooling.git
+cp -R /devops-tooling/html/*  /var/www/html/
+cd /var/www/html/
+sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" db_conn.php 
+sed -i "s/root/tooling/g" db_conn.php
+sed -i "s/pass/t00l!n#/g" db_conn.php
+sed -i "s/dare/toolingdb/g" db_conn.php
+git clone https://github.com/Livingstone95/ACS-project-config.git
+cp -R /ACS-project-config/web.conf /etc/nginx/
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf-distro
+touch /etc/nginx/nginx.conf
+cd /etc/nginx/
+sed -n 'w nginx.conf' web.conf
+systemctl restart nginx
+rm -rf web.conf
+rm -rf ACS-project-config
+
+# Creating database users for wordpress and tooling
+CREATE USER 'wordpress'@'192.168.1.0/24' IDENTIFIED WITH mysql_native_password BY 'w0rdpr33';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'192.168.1.0/24' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+CREATE USER 'wordpress'@'192.168.3.0/24' IDENTIFIED WITH mysql_native_password BY 'w0rdpr33';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'192.168.3.0/24' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+CREATE USER 'tooling'@'192.168.1.0/24' IDENTIFIED WITH mysql_native_password BY 't00l!n#';
+GRANT ALL PRIVILEGES ON tooling.* TO 'tooling'@'192.168.1.0/24' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+CREATE USER 'tooling'@'192.168.3.0/24' IDENTIFIED WITH mysql_native_password BY 't00l!n#';
+GRANT ALL PRIVILEGES ON tooling.* TO 'tooling'@'192.168.2.0/24' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+
+# creating wordpress and tooling database
+CREATE DATABASE toolingdb;
+CREATE DATABASE wordpressdb;
