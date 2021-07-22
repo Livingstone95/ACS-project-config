@@ -1,22 +1,24 @@
-# user data tooling 
-
+#!/bin/bash
 mkdir /var/www
 mount -t efs -o tls,accesspoint=fsap-0b5621b239d1f2a76 fs-ba90ee0e:/ /var/www/
+yum install -y httpd 
+systemctl start httpd
+systemctl enable httpd
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+systemctl start php-fpm
+systemctl enable php-fpm
 git clone https://github.com/Livingstone95/devops-tooling.git
 cp -R /devops-tooling/html/*  /var/www/html/
 cd /var/www/html/
+touch healthstatus
 sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" db_conn.php 
 sed -i "s/root/tooling/g" db_conn.php
 sed -i "s/pass/t00l\!n\#/g" db_conn.php
 sed -i "s/dare/toolingdb/g" db_conn.php
-git clone https://github.com/Livingstone95/ACS-project-config.git
-cp -R /ACS-project-config/web.conf /etc/nginx/
-mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf-distro
-touch /etc/nginx/nginx.conf
-cd /etc/nginx/
-sed -n 'w nginx.conf' web.conf
-systemctl restart nginx
-rm -rf web.conf
-rm -rf ACS-project-config
 chcon -t httpd_sys_rw_content_t /var/www/html/ -R
-chcon -vR system_u:object_r:httpd_sys_content_t:s0 /var/www/html/
+systemctl restart httpd
+
+
+
