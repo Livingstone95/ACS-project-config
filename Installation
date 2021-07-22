@@ -28,13 +28,10 @@ openssl req -newkey rsa:2048 -nodes -keyout /etc/pki/tls/private/ACS.key -x509 -
  vi /etc/httpd/conf.d/ssl.conf
   systemctl reload httpd
 
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ACS.key -out /etc/ssl/certs/ACS.crt
 
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ACS.key -out /etc/ssl/certs/ACS.crt
 
 
-sudo vi /etc/nginx/snippets/self-signed.conf
-
-sudo certbot --nginx -d ip-192-168-2-45.ec2.internal -d www.ip-192-168-2-45.ec2.internal
 
 
 # Creating database users for wordpress and tooling
