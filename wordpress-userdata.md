@@ -4,6 +4,11 @@ mount -t efs -o tls,accesspoint=fsap-0dbc833e213cfff75 fs-ba90ee0e:/ /var/www/
 yum install -y httpd 
 systemctl start httpd
 systemctl enable httpd
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
+systemctl start php-fpm
+systemctl enable php-fpm
 wget http://wordpress.org/latest.tar.gz
 tar xzvf latest.tar.gz
 rm -rf latest.tar.gz
