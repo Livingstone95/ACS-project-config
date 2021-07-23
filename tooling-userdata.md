@@ -14,8 +14,8 @@ cp -R /devops-tooling/html/*  /var/www/html/
 cd /var/www/html/
 touch healthstatus
 sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" db_conn.php 
-sed -i "s/root/tooling/g" db_conn.php
-sed -i "s/pass/t00l\!n\#/g" db_conn.php
+sed -i "s/root/ACSadmin/g" db_conn.php
+sed -i "s/pass/admin12345/g" db_conn.php
 sed -i "s/dare/toolingdb/g" db_conn.php
 chcon -t httpd_sys_rw_content_t /var/www/html/ -R
 systemctl restart httpd
