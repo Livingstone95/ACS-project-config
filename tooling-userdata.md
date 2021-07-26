@@ -9,14 +9,12 @@ yum module enable php:remi-7.4 -y
 yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json
 systemctl start php-fpm
 systemctl enable php-fpm
-git clone https://github.com/Livingstone95/devops-tooling.git
-cp -R /devops-tooling/html/*  /var/www/html/
+git clone https://github.com/Livingstone95/tooling-1.git
+cp -R /tooling-1/html/*  /var/www/html/
+cd /tooling-1
+mysql -h acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com -u ACSadmin -p toolingdb < tooling-db.sql
 cd /var/www/html/
 touch healthstatus
-sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" db_conn.php 
-sed -i "s/root/ACSadmin/g" db_conn.php
-sed -i "s/pass/admin12345/g" db_conn.php
-sed -i "s/dare/toolingdb/g" db_conn.php
 chcon -t httpd_sys_rw_content_t /var/www/html/ -R
 systemctl restart httpd
 
