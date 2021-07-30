@@ -1,6 +1,6 @@
 #!/bin/bash
 mkdir /var/www/
-mount -t efs -o tls,accesspoint=fsap-092c9c25038580faf fs-addd9d19:/ /var/www/
+sudo mount -t efs -o tls,accesspoint=fsap-092c9c25038580faf fs-addd9d19:/ /var/www/
 yum install -y httpd 
 systemctl start httpd
 systemctl enable httpd
@@ -13,7 +13,8 @@ wget http://wordpress.org/latest.tar.gz
 tar xzvf latest.tar.gz
 rm -rf latest.tar.gz
 cp wordpress/wp-config-sample.php wordpress/wp-config.php
-cp -R wordpress/* /var/www/html/
+mkdir /var/www/html/
+cp -R /wordpress/* /var/www/html/
 cd /var/www/html/
 touch healthstatus
 sed -i "s/localhost/acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com/g" wp-config.php 

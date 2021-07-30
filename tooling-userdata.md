@@ -1,6 +1,6 @@
 #!/bin/bash
-mkdir /var/www
-mount -t efs -o tls,accesspoint=fsap-045b7d5ec007f49c1 fs-addd9d19:/ /var/www/
+mkdir /var/www/
+sudo mount -t efs -o tls,accesspoint=fsap-045b7d5ec007f49c1 fs-addd9d19:/ /var/www/
 yum install -y httpd 
 systemctl start httpd
 systemctl enable httpd
@@ -10,6 +10,7 @@ yum install -y php php-common php-mbstring php-opcache php-intl php-xml php-gd p
 systemctl start php-fpm
 systemctl enable php-fpm
 git clone https://github.com/Livingstone95/tooling-1.git
+mkdir /var/www/html
 cp -R /tooling-1/html/*  /var/www/html/
 cd /tooling-1
 mysql -h acs-database.cdqpbjkethv0.us-east-1.rds.amazonaws.com -u ACSadmin -p toolingdb < tooling-db.sql
