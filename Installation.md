@@ -1,3 +1,13 @@
+### order of creation
+
+- create security group first
+- create certificate
+- create ALB
+- create Launch template
+- create Austocaling
+
+
+
 # Bastion ami installation
 -------------------------------------
 yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
